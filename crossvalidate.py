@@ -36,31 +36,41 @@ def parse_emails(keyfile):
 
 def validate(trainer, set_of_emails):
   correct = 0
-  false_positives = 0.0
-  false_negatives = 0.0
+  false_positive = 0.0
+  false_negative = 0.0
+  true_positive = 0.0
+  true_negative = 0.0
   confidence = 0.0
+
+  total = 0
 
   for email in set_of_emails:
     classification = trainer.classify(email)
     confidence += classification.score
+    total += 1
 
     if classification.guess == 'spam' and email.category == 'ham':
-      false_positives += 1
+      false_positive += 1
     elif classification.guess == 'ham' and email.category == 'spam':
-      false_negatives += 1
-    else:
-      correct += 1
+      false_negative += 1
+    elif classification.guess == 'ham' and email.category == 'ham':
+      true_negative += 1
+    elif classification.guess == 'spam' and email.category == 'spam':
+      true_positive += 1
     
-  total = false_positives + false_negatives + correct
   
-  false_positive_rate = false_positives/total
-  false_negative_rate = false_negatives/total
-  accuracy = (total - (false_positives + false_negatives)) / total
   message = """
-  False Positives: {0}
-  False Negatives: {1} 
-  Accuracy: {2} 
-  """.format(false_positive_rate, false_negative_rate, accuracy)
+         Predicted
+        SPAM  | HAM
+  SPAM  {0}   | {1}
+  HAM   {2}   | {3}
+  -----------------
+  Precision: {4}
+  Recall: {5}
+  Accuracy: {6} 
+  """.format(true_positive, false_negative, false_positive, true_negative,
+             true_positive / (true_positive + false_positive), true_positive / (true_positive + false_negative),
+             (true_positive + true_negative) / total)
   print(message)
 
 trainer = label_to_training_data('./tests/fixtures/fold1.label')
