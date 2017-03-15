@@ -35,7 +35,7 @@ class SpamTrainer:
     scoresum = sum(score.values())
 
     if sys.version_info[0] < 3:
-        normalized = {cat: (aggregate/scoresum) for cat, aggregate in score.iteritems()}
+        normalized = {cat: (aggregate/scoresum) for cat, aggregate in score.iteritems()} 
     else:
         normalized = {cat: (aggregate/scoresum) for cat, aggregate in score.items() }
     return normalized
@@ -59,15 +59,29 @@ class SpamTrainer:
   def score(self, email):
     self.train()
 
+    # TODO: The goal of this is to create the actual naive bayesian score
+    # There are a few options here
+    # You can toy with different tokenization schemes
+    # I have used Tokenizer.unique_tokenizer(email.body())
+
     cat_totals = self.totals
+
+    # This will give you a starting probability
+    # for instance P(Spam) = ?
+    # P(Ham) = ?
+    # ==> {Ham: ?, Spam: ?}
+    # HINT use this to multiply on to create the naive bayesian score
 
     aggregates = {cat: cat_totals[cat]/cat_totals['_all'] for cat in self.categories}
 
-    for token in Tokenizer.unique_tokenizer(email.body()):
+    for token in ?? # TODO: look at Tokenizer and see if you can determine a simple model
       for cat in self.categories:
-        value = self.training[cat][token]
-        r = (value+1)/(cat_totals[cat]+1)
-        aggregates[cat] *= r
+        # TODO create joint probability by multiplying on the correct aggregates above
+        # to get the number of tokens used look at self.training
+        # to get the category totals look at cat_totals or self.totals
+        # From there create a probability out of the two.
+        # HINT: use a psuedo count. Everything gets a 1 added to it. This avoids cases like 
+        # Divison by zero
 
     return aggregates
 
